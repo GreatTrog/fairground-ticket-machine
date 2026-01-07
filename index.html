@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fairground Ticket Machine</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Fredoka:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --ink: #1f1147;
+        --muted: #475569;
+        --accent: #ff4d6d;
+        --accent-2: #00c2a8;
+        --accent-3: #ffd166;
+        --card: #ffffff;
+        --shadow: 0 20px 45px rgba(15, 23, 42, 0.18);
+        --ring: rgba(255, 77, 109, 0.35);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Fredoka", "Segoe UI", sans-serif;
+        color: var(--ink);
+        background: radial-gradient(circle at top left, #ffe3e0 0%, #fff4cc 35%, #e0fbff 75%, #dbeafe 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 32px 16px 48px;
+      }
+
+      .shell {
+        width: min(980px, 100%);
+        background: var(--card);
+        border-radius: 32px;
+        box-shadow: var(--shadow);
+        padding: 32px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .shell::before,
+      .shell::after {
+        content: "";
+        position: absolute;
+        width: 240px;
+        height: 240px;
+        border-radius: 40%;
+        opacity: 0.12;
+        filter: blur(0);
+        z-index: 0;
+      }
+
+      .shell::before {
+        background: #ff4d6d;
+        top: -60px;
+        right: -40px;
+        transform: rotate(18deg);
+      }
+
+      .shell::after {
+        background: #00c2a8;
+        bottom: -80px;
+        left: -60px;
+        transform: rotate(-12deg);
+      }
+
+      header {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      h1 {
+        font-family: "Baloo 2", "Georgia", serif;
+        font-size: clamp(2.2rem, 4vw, 3.2rem);
+        margin: 0;
+      }
+
+      .subtitle {
+        color: var(--muted);
+        margin: 0;
+        font-size: 1.1rem;
+      }
+
+      .layout {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 24px;
+        margin-top: 26px;
+        align-items: start;
+      }
+
+      .panel {
+        background: #fff8f2;
+        border: 2px solid rgba(255, 77, 109, 0.15);
+        border-radius: 22px;
+        padding: 22px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        min-height: 240px;
+      }
+
+      .panel h2 {
+        font-size: 1.25rem;
+        margin: 0;
+        font-weight: 800;
+      }
+
+      label {
+        font-weight: 700;
+        font-size: 1.05rem;
+      }
+
+      input,
+      select,
+      button {
+        font-family: inherit;
+        font-size: 1.05rem;
+      }
+
+      input,
+      select {
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 14px;
+        border: 2px solid rgba(148, 163, 184, 0.5);
+        transition: border 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      input:focus,
+      select:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--ring);
+      }
+
+      .error {
+        color: #b42318;
+        font-size: 0.98rem;
+        min-height: 1.1rem;
+      }
+
+      .btn-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      button {
+        border: none;
+        border-radius: 999px;
+        padding: 12px 18px;
+        cursor: pointer;
+        font-weight: 800;
+        letter-spacing: 0.2px;
+      }
+
+      .primary {
+        background: linear-gradient(120deg, var(--accent), #ff8fab);
+        color: white;
+      }
+
+      .secondary {
+        background: #e0f2fe;
+        color: #0f172a;
+      }
+
+      .ghost {
+        background: transparent;
+        color: #0f172a;
+        border: 2px dashed rgba(148, 163, 184, 0.5);
+      }
+
+      .output {
+        font-size: 1.35rem;
+        font-weight: 800;
+        min-height: 2.2rem;
+      }
+
+      .level-image {
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        border-radius: 18px;
+        margin-top: 8px;
+        border: 3px solid rgba(255, 77, 109, 0.18);
+        box-shadow: 0 10px 20px rgba(15, 23, 42, 0.12);
+        object-fit: cover;
+      }
+
+      .output small {
+        display: block;
+        font-weight: 500;
+        color: #475569;
+        margin-top: 8px;
+      }
+
+      .teacher {
+        font-size: 1rem;
+        color: #1f2937;
+        background: rgba(255, 209, 102, 0.22);
+        padding: 12px 14px;
+        border-radius: 14px;
+        border: 2px solid rgba(255, 209, 102, 0.65);
+      }
+
+      .fade-in {
+        animation: fadeIn 0.5s ease;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(6px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (max-width: 720px) {
+        .shell {
+          padding: 22px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <header>
+        <h1>Fairground Ticket Machine</h1>
+        <p class="subtitle">Pick a fairground, enter your numbers, and see the total cost.</p>
+      </header>
+
+      <section class="layout">
+        <div class="panel">
+          <h2>Choose a fairground</h2>
+          <label for="levelSelect">Level</label>
+          <select id="levelSelect" aria-label="Choose a fairground level"></select>
+          <div id="inputsPanel"></div>
+          <div class="error" id="errorMessage" role="alert"></div>
+          <div class="btn-row">
+            <button class="primary" id="calculateBtn">Calculate total</button>
+            <button class="secondary" id="tryAnotherBtn">Try another input</button>
+            <button class="ghost" id="resetBtn">Reset</button>
+          </div>
+          <button class="ghost" id="teacherToggleBtn">Teacher mode</button>
+        </div>
+
+        <div class="panel">
+          <h2>Result</h2>
+          <div class="output" id="outputPanel">Total cost: £0</div>
+          <img id="levelImage" class="level-image" alt="" />
+          <div id="teacherPanel" class="teacher" hidden></div>
+          <div id="devPanel" class="teacher" hidden></div>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      const TEACHER_PASSWORD = "teach-mode-9";
+      const DEV_MODE = window.location.hash.includes("dev");
+
+      const levels = [
+        {
+          id: "sunny",
+          name: "Sunny Sands",
+          inputs: [{ key: "people", label: "Number of people" }],
+          compute(values) {
+            return { total: 3 * values.people };
+          },
+          teacherFormula: "3n",
+        },
+        {
+          id: "thunder",
+          name: "Thunder Loop",
+          inputs: [{ key: "people", label: "Number of people" }],
+          compute(values) {
+            return { total: 4 * values.people + 5 };
+          },
+          teacherFormula: "4n + 5",
+        },
+        {
+          id: "neon",
+          name: "Neon Nights",
+          inputs: [{ key: "people", label: "Number of people" }],
+          compute(values) {
+            return {
+              optionA: 3 * values.people,
+              optionB: 2 * values.people + 10,
+            };
+          },
+          teacherFormula: "A: 3n | B: 2n + 10",
+        },
+        {
+          id: "mystery",
+          name: "Mystery Island",
+          inputs: [
+            { key: "people", label: "Number of people" },
+            { key: "rides", label: "Number of rides" },
+          ],
+          compute(values) {
+            return { total: 2 * values.people + 3 * values.rides + 6 };
+          },
+          teacherFormula: "2p + 3r + 6",
+        },
+      ];
+
+      const state = {
+        levelId: levels[0].id,
+        teacherMode: false,
+      };
+
+      const levelSelect = document.getElementById("levelSelect");
+      const inputsPanel = document.getElementById("inputsPanel");
+      const errorMessage = document.getElementById("errorMessage");
+      const outputPanel = document.getElementById("outputPanel");
+      const teacherPanel = document.getElementById("teacherPanel");
+      const devPanel = document.getElementById("devPanel");
+      const levelImage = document.getElementById("levelImage");
+      const calculateBtn = document.getElementById("calculateBtn");
+      const tryAnotherBtn = document.getElementById("tryAnotherBtn");
+      const resetBtn = document.getElementById("resetBtn");
+      const teacherToggleBtn = document.getElementById("teacherToggleBtn");
+
+      function renderLevelOptions() {
+        levelSelect.innerHTML = "";
+        levels.forEach((level) => {
+          const option = document.createElement("option");
+          option.value = level.id;
+          option.textContent = level.name;
+          levelSelect.appendChild(option);
+        });
+      }
+
+      function renderInputs() {
+        const level = getCurrentLevel();
+        inputsPanel.innerHTML = "";
+        level.inputs.forEach((input) => {
+          const wrapper = document.createElement("div");
+          wrapper.className = "fade-in";
+
+          const label = document.createElement("label");
+          label.textContent = input.label;
+          label.setAttribute("for", `input-${input.key}`);
+
+          const field = document.createElement("input");
+          field.id = `input-${input.key}`;
+          field.type = "text";
+          field.inputMode = "numeric";
+          field.placeholder = "Whole number (0 to 200)";
+          field.dataset.key = input.key;
+
+          wrapper.appendChild(label);
+          wrapper.appendChild(field);
+          inputsPanel.appendChild(wrapper);
+        });
+        clearMessages();
+        updateOutputDefault();
+      }
+
+      function getCurrentLevel() {
+        return levels.find((level) => level.id === state.levelId);
+      }
+
+      function parseInputs() {
+        const values = {};
+        const fields = inputsPanel.querySelectorAll("input");
+        for (const field of fields) {
+          const raw = field.value.trim();
+          if (raw === "") {
+            return { error: "Please enter a whole number." };
+          }
+          const number = Number(raw);
+          if (!Number.isInteger(number)) {
+            return { error: "Please enter a whole number." };
+          }
+          if (number < 0 || number > 200) {
+            return { error: "Please enter a whole number from 0 to 200." };
+          }
+          values[field.dataset.key] = number;
+        }
+        return { values };
+      }
+
+      function updateOutputDefault() {
+        outputPanel.textContent = "Total cost: £0";
+      }
+
+      function clearMessages() {
+        errorMessage.textContent = "";
+        outputPanel.classList.remove("fade-in");
+      }
+
+      function renderOutput(result) {
+        const level = getCurrentLevel();
+        outputPanel.classList.add("fade-in");
+        if (level.id === "neon") {
+          outputPanel.innerHTML = `Option A total: £${result.optionA}<br />Option B total: £${result.optionB}<small>Which option is better value for this group?</small>`;
+        } else {
+          outputPanel.textContent = `Total cost: £${result.total}`;
+        }
+        renderTeacherPanel(level);
+      }
+
+      function renderLevelImage(level) {
+        const imageMap = {
+          sunny: "images/sunnysands.jpg",
+          thunder: "images/thunderloop.jpg",
+          neon: "images/neonnights.jpg",
+          mystery: "images/mysteryisland.jpg",
+        };
+        const altMap = {
+          sunny: "Sunny Sands fairground scene",
+          thunder: "Thunder Loop fairground scene",
+          neon: "Neon Nights fairground scene",
+          mystery: "Mystery Island fairground scene",
+        };
+        levelImage.src = imageMap[level.id];
+        levelImage.alt = altMap[level.id];
+      }
+
+      function renderTeacherPanel(level) {
+        if (!state.teacherMode) {
+          teacherPanel.hidden = true;
+          return;
+        }
+        teacherPanel.hidden = false;
+        teacherPanel.textContent = `Teacher formula: ${level.teacherFormula}`;
+      }
+
+      function handleCalculate() {
+        clearMessages();
+        const parsed = parseInputs();
+        if (parsed.error) {
+          errorMessage.textContent = parsed.error;
+          return;
+        }
+        const level = getCurrentLevel();
+        const result = level.compute(parsed.values);
+        renderOutput(result);
+      }
+
+      function handleTryAnother() {
+        inputsPanel.querySelectorAll("input").forEach((field) => {
+          field.value = "";
+        });
+        clearMessages();
+        updateOutputDefault();
+      }
+
+      function handleReset() {
+        state.levelId = levels[0].id;
+        levelSelect.value = state.levelId;
+        renderInputs();
+        updateOutputDefault();
+      }
+
+      function handleTeacherToggle() {
+        if (!state.teacherMode) {
+          const password = window.prompt("Teacher password:");
+          if (password !== TEACHER_PASSWORD) {
+            window.alert("Sorry, that password is not correct.");
+            return;
+          }
+        }
+        state.teacherMode = !state.teacherMode;
+        renderTeacherPanel(getCurrentLevel());
+      }
+
+      function runDevTests() {
+        const tests = [
+          { level: "sunny", input: { people: 0 }, expected: { total: 0 } },
+          { level: "sunny", input: { people: 4 }, expected: { total: 12 } },
+          { level: "sunny", input: { people: 17 }, expected: { total: 51 } },
+          { level: "thunder", input: { people: 0 }, expected: { total: 5 } },
+          { level: "thunder", input: { people: 1 }, expected: { total: 9 } },
+          { level: "thunder", input: { people: 5 }, expected: { total: 25 } },
+          { level: "thunder", input: { people: 20 }, expected: { total: 85 } },
+          { level: "neon", input: { people: 0 }, expected: { optionA: 0, optionB: 10 } },
+          { level: "neon", input: { people: 4 }, expected: { optionA: 12, optionB: 18 } },
+          { level: "neon", input: { people: 10 }, expected: { optionA: 30, optionB: 30 } },
+          { level: "neon", input: { people: 20 }, expected: { optionA: 60, optionB: 50 } },
+          { level: "mystery", input: { people: 3, rides: 5 }, expected: { total: 27 } },
+          { level: "mystery", input: { people: 0, rides: 4 }, expected: { total: 18 } },
+          { level: "mystery", input: { people: 10, rides: 0 }, expected: { total: 26 } },
+        ];
+
+        let passed = 0;
+        tests.forEach((test) => {
+          const level = levels.find((item) => item.id === test.level);
+          const result = level.compute(test.input);
+          const keys = Object.keys(test.expected);
+          const match = keys.every((key) => result[key] === test.expected[key]);
+          if (!match) {
+            throw new Error(`Test failed for ${test.level}: expected ${JSON.stringify(test.expected)}, got ${JSON.stringify(result)}`);
+          }
+          passed += 1;
+        });
+
+        devPanel.hidden = false;
+        devPanel.textContent = `Dev tests passed: ${passed}`;
+      }
+
+      renderLevelOptions();
+      renderInputs();
+      renderTeacherPanel(getCurrentLevel());
+      renderLevelImage(getCurrentLevel());
+
+      levelSelect.addEventListener("change", (event) => {
+        state.levelId = event.target.value;
+        renderInputs();
+        renderTeacherPanel(getCurrentLevel());
+        renderLevelImage(getCurrentLevel());
+      });
+
+      calculateBtn.addEventListener("click", handleCalculate);
+      tryAnotherBtn.addEventListener("click", handleTryAnother);
+      resetBtn.addEventListener("click", handleReset);
+      teacherToggleBtn.addEventListener("click", handleTeacherToggle);
+
+      if (DEV_MODE) {
+        runDevTests();
+      }
+    </script>
+  </body>
+</html>
