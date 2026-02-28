@@ -96,7 +96,7 @@
         position: relative;
         z-index: 1;
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        grid-template-columns: repeat(2, minmax(280px, 1fr));
         gap: 24px;
         margin-top: 26px;
         align-items: start;
@@ -216,6 +216,82 @@
         border: 2px solid rgba(255, 209, 102, 0.65);
       }
 
+      .teacher p {
+        margin: 0 0 8px;
+      }
+
+      .teacher p:last-child {
+        margin-bottom: 0;
+      }
+
+      .instruction-panel {
+        background: #f2fbff;
+        border-color: rgba(0, 194, 168, 0.28);
+      }
+
+      .instruction-panel h3 {
+        margin: 0;
+        font-size: 1.06rem;
+      }
+
+      .instruction-list {
+        margin: 0;
+        padding-left: 20px;
+        color: #0f172a;
+      }
+
+      .instruction-list li {
+        margin-bottom: 8px;
+      }
+
+      .instruction-list li:last-child {
+        margin-bottom: 0;
+      }
+
+      .table-wrap {
+        overflow-x: visible;
+      }
+
+      .pattern-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.96rem;
+        background: #ffffff;
+        border-radius: 12px;
+        overflow: hidden;
+      }
+
+      .pattern-table th,
+      .pattern-table td {
+        border: 1px solid rgba(148, 163, 184, 0.35);
+        padding: 8px 10px;
+        text-align: left;
+        white-space: normal;
+        word-break: break-word;
+      }
+
+      .pattern-table th {
+        background: #ecfeff;
+        font-weight: 700;
+      }
+
+      .table-input {
+        width: 100%;
+        padding: 8px;
+        border-radius: 10px;
+        border: 2px solid rgba(148, 163, 184, 0.45);
+      }
+
+      .table-panel {
+        grid-column: 1 / -1;
+      }
+
+      .table-note {
+        margin: 0;
+        font-size: 0.92rem;
+        color: var(--muted);
+      }
+
       .fade-in {
         animation: fadeIn 0.5s ease;
       }
@@ -232,6 +308,10 @@
       }
 
       @media (max-width: 720px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+
         .shell {
           padding: 22px;
         }
@@ -267,6 +347,16 @@
           <div id="teacherPanel" class="teacher" hidden></div>
           <div id="devPanel" class="teacher" hidden></div>
         </div>
+
+      </section>
+
+      <section class="panel instruction-panel table-panel">
+        <h2 id="instructionTitle">Level notes</h2>
+        <h3>How to think about this level</h3>
+        <ul class="instruction-list" id="instructionList"></ul>
+        <h3>Recording table</h3>
+        <div class="table-wrap" id="tableWrap"></div>
+        <p class="table-note" id="tableNote"></p>
       </section>
     </div>
 
@@ -282,7 +372,31 @@
           compute(values) {
             return { total: 3 * values.people };
           },
+          teacherScenario: "Pricing structure: 3 GBP per person, no fixed fee.",
           teacherFormula: "3n",
+          notes: [
+            "Test the machine by entering different numbers of people.",
+            "Predict first, then check, then record what changed each time.",
+            "Spot the pattern and describe the rule in words.",
+          ],
+          table: {
+            columns: [
+              { key: "test", label: "Test #", readonly: true },
+              { key: "people", label: "People (input)", readonly: true },
+              { key: "prediction", label: "My prediction (GBP)", type: "number" },
+              { key: "machine", label: "Machine output (GBP)", type: "number" },
+              { key: "pattern", label: "What changed? (pattern)", type: "text" },
+            ],
+            rows: [
+              { test: 1, people: 0, prediction: "", machine: "", pattern: "" },
+              { test: 2, people: 1, prediction: "", machine: "", pattern: "" },
+              { test: 3, people: 2, prediction: "", machine: "", pattern: "" },
+              { test: 4, people: 3, prediction: "", machine: "", pattern: "" },
+              { test: 5, people: 5, prediction: "", machine: "", pattern: "" },
+              { test: 6, people: 10, prediction: "", machine: "", pattern: "" },
+            ],
+            note: "Mission rule: always predict first, then use the machine, then record the pattern.",
+          },
         },
         {
           id: "thunder",
@@ -291,7 +405,32 @@
           compute(values) {
             return { total: 4 * values.people + 5 };
           },
+          teacherScenario: "Pricing structure: 4 GBP per person plus a fixed 5 GBP parking charge per visit.",
           teacherFormula: "4n + 5",
+          notes: [
+            "Investigate whether there is an extra fixed charge added once.",
+            "Compare differences between tests to see what stays the same.",
+            "Explain your rule in words and justify it with table evidence.",
+          ],
+          table: {
+            columns: [
+              { key: "test", label: "Test #", readonly: true },
+              { key: "people", label: "People (input)", readonly: true },
+              { key: "prediction", label: "My prediction (GBP)", type: "number" },
+              { key: "machine", label: "Machine output (GBP)", type: "number" },
+              { key: "difference", label: "Difference between tests (GBP)", type: "text" },
+              { key: "same", label: "What stays the same?", type: "text" },
+            ],
+            rows: [
+              { test: 1, people: 0, prediction: "", machine: "", difference: "", same: "" },
+              { test: 2, people: 1, prediction: "", machine: "", difference: "", same: "" },
+              { test: 3, people: 2, prediction: "", machine: "", difference: "", same: "" },
+              { test: 4, people: 3, prediction: "", machine: "", difference: "", same: "" },
+              { test: 5, people: 5, prediction: "", machine: "", difference: "", same: "" },
+              { test: 6, people: 10, prediction: "", machine: "", difference: "", same: "" },
+            ],
+            note: "Focus on the change between rows: what increases each time, and what does not?",
+          },
         },
         {
           id: "neon",
@@ -303,7 +442,35 @@
               optionB: 2 * values.people + 10,
             };
           },
+          teacherScenario: "Pricing structure: compare Option A (3 GBP per person) with Option B (2 GBP per person plus a fixed 10 GBP wristband fee).",
           teacherFormula: "A: 3n | B: 2n + 10",
+          notes: [
+            "Compare both options for the same group size.",
+            "Record which option is cheaper and by how much each time.",
+            "Find if there is a crossover point where both options are equal.",
+          ],
+          table: {
+            columns: [
+              { key: "people", label: "People (input)", readonly: true },
+              { key: "optionA", label: "Option A output (GBP)", type: "number" },
+              { key: "optionB", label: "Option B output (GBP)", type: "number" },
+              { key: "cheaper", label: "Which is cheaper?", type: "text" },
+              { key: "gap", label: "How much cheaper? (GBP)", type: "number" },
+            ],
+            rows: [
+              { people: 0, optionA: "", optionB: "", cheaper: "", gap: "" },
+              { people: 1, optionA: "", optionB: "", cheaper: "", gap: "" },
+              { people: 2, optionA: "", optionB: "", cheaper: "", gap: "" },
+              { people: 4, optionA: "", optionB: "", cheaper: "", gap: "" },
+              { people: 6, optionA: "", optionB: "", cheaper: "", gap: "" },
+              { people: 8, optionA: "", optionB: "", cheaper: "", gap: "" },
+              { people: 10, optionA: "", optionB: "", cheaper: "", gap: "" },
+              { people: 12, optionA: "", optionB: "", cheaper: "", gap: "" },
+              { people: 15, optionA: "", optionB: "", cheaper: "", gap: "" },
+              { people: 20, optionA: "", optionB: "", cheaper: "", gap: "" },
+            ],
+            note: "Use the calculator panel to test each input and record both outputs here.",
+          },
         },
         {
           id: "mystery",
@@ -315,13 +482,44 @@
           compute(values) {
             return { total: 2 * values.people + 3 * values.rides + 6 };
           },
+          teacherScenario: "Pricing structure: 2 GBP per person, 3 GBP per ride, plus 6 GBP fixed fee per visit.",
           teacherFormula: "2p + 3r + 6",
+          notes: [
+            "Change one input at a time to investigate what each part does.",
+            "Record what happened to the total when only people changed or only rides changed.",
+            "Write a general rule in words that works for any combination.",
+          ],
+          table: {
+            columns: [
+              { key: "test", label: "Test #", readonly: true },
+              { key: "people", label: "People (input)", readonly: true },
+              { key: "rides", label: "Rides (input)", readonly: true },
+              { key: "prediction", label: "My prediction (GBP)", type: "number" },
+              { key: "machine", label: "Machine output (GBP)", type: "number" },
+              { key: "changed", label: "What did we change?", readonly: true },
+              { key: "effect", label: "What happened to the total?", type: "text" },
+            ],
+            rows: [
+              { test: 1, people: 0, rides: 0, prediction: "", machine: "", changed: "Starting point", effect: "" },
+              { test: 2, people: 1, rides: 0, prediction: "", machine: "", changed: "+1 person", effect: "" },
+              { test: 3, people: 2, rides: 0, prediction: "", machine: "", changed: "+1 person", effect: "" },
+              { test: 4, people: 3, rides: 0, prediction: "", machine: "", changed: "+1 person", effect: "" },
+              { test: 5, people: 3, rides: 1, prediction: "", machine: "", changed: "+1 ride (people same)", effect: "" },
+              { test: 6, people: 3, rides: 2, prediction: "", machine: "", changed: "+1 ride (people same)", effect: "" },
+              { test: 7, people: 3, rides: 3, prediction: "", machine: "", changed: "+1 ride (people same)", effect: "" },
+              { test: 8, people: 5, rides: 3, prediction: "", machine: "", changed: "+2 people (rides same)", effect: "" },
+              { test: 9, people: 5, rides: 5, prediction: "", machine: "", changed: "+2 rides (people same)", effect: "" },
+              { test: 10, people: 10, rides: 4, prediction: "", machine: "", changed: "New test (both changed)", effect: "" },
+            ],
+            note: "Investigation tip: keep one input fixed while changing the other.",
+          },
         },
       ];
 
       const state = {
         levelId: levels[0].id,
         teacherMode: false,
+        tableRows: [],
       };
 
       const levelSelect = document.getElementById("levelSelect");
@@ -331,6 +529,10 @@
       const teacherPanel = document.getElementById("teacherPanel");
       const devPanel = document.getElementById("devPanel");
       const levelImage = document.getElementById("levelImage");
+      const instructionTitle = document.getElementById("instructionTitle");
+      const instructionList = document.getElementById("instructionList");
+      const tableWrap = document.getElementById("tableWrap");
+      const tableNote = document.getElementById("tableNote");
       const calculateBtn = document.getElementById("calculateBtn");
       const tryAnotherBtn = document.getElementById("tryAnotherBtn");
       const resetBtn = document.getElementById("resetBtn");
@@ -374,6 +576,89 @@
 
       function getCurrentLevel() {
         return levels.find((level) => level.id === state.levelId);
+      }
+
+      function initialiseTableRows(level) {
+        state.tableRows = level.table.rows.map((row) => ({ ...row }));
+      }
+
+      function formatCellValue(value) {
+        if (value === undefined || value === null) {
+          return "";
+        }
+        return String(value);
+      }
+
+      function clampWholeNumber(value) {
+        if (!Number.isFinite(value)) {
+          return "";
+        }
+        if (value < 0) {
+          return 0;
+        }
+        if (value > 200) {
+          return 200;
+        }
+        return Math.floor(value);
+      }
+
+      function renderInstructionPanel(level) {
+        instructionTitle.textContent = `${level.name} notes`;
+        instructionList.innerHTML = "";
+        level.notes.forEach((note) => {
+          const item = document.createElement("li");
+          item.textContent = note;
+          instructionList.appendChild(item);
+        });
+        renderInteractiveTable(level);
+      }
+
+      function renderInteractiveTable(level) {
+        const table = document.createElement("table");
+        table.className = "pattern-table";
+
+        const head = document.createElement("thead");
+        const headRow = document.createElement("tr");
+        level.table.columns.forEach((column) => {
+          const th = document.createElement("th");
+          th.textContent = column.label;
+          headRow.appendChild(th);
+        });
+        head.appendChild(headRow);
+        table.appendChild(head);
+
+        const body = document.createElement("tbody");
+        state.tableRows.forEach((baseRow, rowIndex) => {
+          const tr = document.createElement("tr");
+
+          level.table.columns.forEach((column) => {
+            const td = document.createElement("td");
+            if (!column.readonly) {
+              const input = document.createElement("input");
+              input.className = "table-input";
+              input.type = column.type === "number" ? "number" : "text";
+              if (column.type === "number") {
+                input.min = "0";
+                input.max = "200";
+                input.step = "1";
+              }
+              input.value = formatCellValue(baseRow[column.key]);
+              input.placeholder = column.type === "number" ? "..." : "Notes";
+              input.dataset.row = String(rowIndex);
+              input.dataset.key = column.key;
+              td.appendChild(input);
+            } else {
+              td.textContent = formatCellValue(baseRow[column.key]);
+            }
+            tr.appendChild(td);
+          });
+          body.appendChild(tr);
+        });
+
+        table.appendChild(body);
+        tableWrap.innerHTML = "";
+        tableWrap.appendChild(table);
+        tableNote.textContent = level.table.note;
       }
 
       function parseInputs() {
@@ -439,7 +724,7 @@
           return;
         }
         teacherPanel.hidden = false;
-        teacherPanel.textContent = `Teacher formula: ${level.teacherFormula}`;
+        teacherPanel.innerHTML = `<p>${level.teacherScenario}</p><p><strong>Teacher formula:</strong> ${level.teacherFormula}</p>`;
       }
 
       function handleCalculate() {
@@ -465,7 +750,9 @@
       function handleReset() {
         state.levelId = levels[0].id;
         levelSelect.value = state.levelId;
+        initialiseTableRows(getCurrentLevel());
         renderInputs();
+        renderInstructionPanel(getCurrentLevel());
         updateOutputDefault();
       }
 
@@ -516,21 +803,48 @@
       }
 
       renderLevelOptions();
+      initialiseTableRows(getCurrentLevel());
       renderInputs();
+      renderInstructionPanel(getCurrentLevel());
       renderTeacherPanel(getCurrentLevel());
       renderLevelImage(getCurrentLevel());
 
       levelSelect.addEventListener("change", (event) => {
         state.levelId = event.target.value;
+        initialiseTableRows(getCurrentLevel());
         renderInputs();
+        renderInstructionPanel(getCurrentLevel());
         renderTeacherPanel(getCurrentLevel());
         renderLevelImage(getCurrentLevel());
+      });
+
+      tableWrap.addEventListener("change", (event) => {
+        if (!event.target.classList.contains("table-input")) {
+          return;
+        }
+        const level = getCurrentLevel();
+        const rowIndex = Number(event.target.dataset.row);
+        const key = event.target.dataset.key;
+        const column = level.table.columns.find((item) => item.key === key);
+        const nextValue =
+          column && column.type === "number"
+            ? clampWholeNumber(Number(event.target.value))
+            : event.target.value.trim();
+        state.tableRows[rowIndex][key] = nextValue;
+        renderInteractiveTable(level);
       });
 
       calculateBtn.addEventListener("click", handleCalculate);
       tryAnotherBtn.addEventListener("click", handleTryAnother);
       resetBtn.addEventListener("click", handleReset);
       teacherToggleBtn.addEventListener("click", handleTeacherToggle);
+      inputsPanel.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter") {
+          return;
+        }
+        event.preventDefault();
+        handleCalculate();
+      });
 
       if (DEV_MODE) {
         runDevTests();
